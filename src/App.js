@@ -1,25 +1,39 @@
-import logo from './logo.svg';
-import './App.css';
+import React, { useEffect } from 'react';
+import { createConsumer } from '@rails/actioncable';
 
-function App() {
+const token = "your_token_here";
+const url = "ws://localhost:3005/cable";
+
+const App = () => {
+  useEffect(() => {
+    // Create Action Cable consumer
+    const cable = createConsumer(url);
+
+    // Subscribe to a channel
+    const channel = cable.subscriptions.create('SidekiqNotificationsChannel', {
+      connected() {
+        console.log('Connected to SidekiqNotificationsChannel');
+      },
+      disconnected() {
+        console.log('Disconnected from SidekiqNotificationsChannel');
+      },
+      received(data) {
+        console.log('Received:', data);
+      }
+    });
+
+    return () => {
+      // Unsubscribe from the channel when the component unmounts
+      channel.unsubscribe();
+    };
+  }, []);
+
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      <h1>Action Cable Example</h1>
+      <p>Open the browser console to see the received data.</p>
     </div>
   );
-}
+};
 
 export default App;
